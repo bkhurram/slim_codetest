@@ -1,0 +1,612 @@
+openapi: 3.0.0
+info:
+  title: api
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /login:
+    parameters: [ ]
+    post:
+      summary: Login
+      operationId: post-login
+      responses:
+        '200':
+          description: OK
+          headers: { }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwt:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    jwt: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huZG9lQG1haWwuY29tIiwiZ2l2ZW5fbmFtZSI6IkpvaG4iLCJmYW1pbHlfbmFtZSI6IkRvZSIsImV4cCI6MTUxNjI0MjYyMiwiaWF0IjoxNTE2MjM5MDIyfQ.dErCLGIeMHW207lRTzI7WPJPySh_CoQQg7EufyJVwx0
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+            examples: { }
+        description: ''
+      security: [ ]
+  /users:
+    get:
+      summary: List users
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    minimum: 0
+                    multipleOf: 1
+                    format: int32
+                  items:
+                    type: array
+                    minItems: 0
+                    items:
+                      $ref: '#/components/schemas/User'
+                required:
+                  - totalItems
+                  - items
+              examples:
+                Lista popolata:
+                  value:
+                    totalItems: 1
+                    items:
+                      - givenName: John
+                        familyName: Doe
+                        email: johndoe@mail.com
+                        dateOfBirth: '1981-10-31'
+                        createdAt: '2019-08-24T14:15:22Z'
+                        address:
+                          street: 'Corso Buenos Aires, 44'
+                          city: Milano
+                          postalCode: '20124'
+                          countryCode: IT
+                          coordinates:
+                            lat: '45.481243772524024'
+                            lng: '9.21126552409911'
+                Lista vuota:
+                  value:
+                    totalItems: 0
+                    items: [ ]
+      operationId: list-users
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - schema:
+            type: string
+            enum:
+              - +createdAt
+              - '-createdAt'
+              - +dateOfBirth
+              - '-dateOfBirth'
+          in: query
+          name: 'sort[]'
+        - schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+            pattern: '^[A-Z]{2}$'
+          in: query
+          name: 'countryCode[]'
+        - schema:
+            type: string
+            format: email
+          in: query
+          name: 'email[]'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - $ref: '#/components/parameters/Accept'
+    post:
+      summary: ''
+      operationId: post-users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserPayload'
+            examples:
+              example-1:
+                value:
+                  givenName: Mario
+                  familyName: Rossi
+                  email: mario@example.com
+                  dateOfBirth: '1951-04-06'
+                  password: Zaq12wsx%$
+                  address: null
+  '/users/{email}':
+    parameters:
+      - schema:
+          type: string
+          format: email
+        name: email
+        in: path
+        required: true
+    get:
+      summary: Get user by email
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+      operationId: get-user-by-email
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+    put:
+      summary: Update user
+      operationId: update-user-by-email
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Updated user John Doe:
+                  value:
+                    givenName: John
+                    familyName: Doe
+                    email: johndoe@mail.com
+                    dateOfBirth: '1981-10-31'
+                    createdAt: '2019-08-24T14:15:22Z'
+                    address: null
+      description: Aggiorna le informazioni di un utente (esclusa la password)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              Unset address to John Doe:
+                value:
+                  givenName: John
+                  familyName: Doe
+                  email: johndoe@mail.com
+                  dateOfBirth: '1981-10-31'
+                  address: null
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+  /posts:
+    get:
+      summary: List posts
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    minimum: 0
+                    multipleOf: 1
+                    format: int32
+                    readOnly: true
+                  items:
+                    type: array
+                    minItems: 0
+                    items:
+                      $ref: '#/components/schemas/Post'
+                required:
+                  - totalItems
+                  - items
+              examples:
+                Lista popolata:
+                  value:
+                    totalItems: 1
+                    items:
+                      - id: e19be0b6-1263-4ac1-930e-df34d2277b7b
+                        title: Amazing post
+                        body: This is the content of an amazing post
+                        status: online
+                        tags:
+                          - nodejs
+                          - programming
+      operationId: list-posts
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - schema:
+            type: string
+          in: query
+          name: 'tags[]'
+        - schema:
+            type: string
+          in: query
+          name: q
+          description: query string per la ricerca google-like
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - $ref: '#/components/parameters/Accept'
+    post:
+      summary: Add post
+      operationId: post-posts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+            examples: { }
+  '/posts/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Fetch post by id
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Not Found
+      operationId: get-posts-id
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+    put:
+      summary: Update post
+      operationId: put-posts-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWithoutId'
+  '/posts/{id}/comments':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: List comments belonging to given post
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+        '404':
+          description: Not Found
+      operationId: list-post-comments
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+    post:
+      summary: Add comment
+      operationId: post-comments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+components:
+  schemas:
+    CountryCode:
+      type: string
+      title: CountryCode
+      pattern: '^[A-Z]{2}$'
+      minLength: 2
+      maxLength: 2
+    Address:
+      title: Address
+      type: object
+      example:
+        - street: 'Corso Buenos Aires, 44'
+          city: Milano
+          postalCode: '20124'
+          countryCode: IT
+          coordinates:
+            lat: '45.481243772524024'
+            lng: '9.21126552409911'
+      properties:
+        street:
+          type: string
+          minLength: 3
+        city:
+          type: string
+          minLength: 3
+        postalCode:
+          type: string
+          minLength: 3
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        coordinates:
+          type: object
+          properties:
+            lat:
+              type: string
+            lng:
+              type: string
+          required:
+            - lat
+            - lng
+      required:
+        - street
+        - city
+        - postalCode
+        - countryCode
+    User:
+      title: User
+      type: object
+      description: ''
+      example:
+        - givenName: John
+          familyName: Doe
+          email: johndoe@mail.com
+          dateOfBirth: '1981-10-31'
+          createdAt: '2019-08-24T14:15:22Z'
+          address:
+            street: 'Corso Buenos Aires, 44'
+            city: Milano
+            postalCode: '20124'
+            countryCode: IT
+            coordinates:
+              lat: '45.481243772524024'
+              lng: '9.21126552409911'
+        - givenName: Eloise
+          familyName: Zahara
+          email: eloisezahara@mail.com
+          dateOfBirth: '1990-02-12'
+          createdAt: '2021-10-04T09:56:13Z'
+          address: null
+      properties:
+        givenName:
+          type: string
+        familyName:
+          type: string
+        email:
+          type: string
+          format: email
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1997-10-31'
+        createdAt:
+          type: string
+          format: date-time
+          description: Data e ora di creazione dell'utente
+          readOnly: true
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - givenName
+        - familyName
+        - email
+    CreateUserPayload:
+      title: CreateUserPayload
+      type: object
+      description: ''
+      example:
+        - givenName: Mario
+          familyName: Rossi
+          email: mario@example.com
+          dateOfBirth: '1951-04-06'
+          password: Zaq12wsx%$
+          address: null
+      properties:
+        givenName:
+          type: string
+        familyName:
+          type: string
+        email:
+          type: string
+          format: email
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1997-10-31'
+        password:
+          type: string
+          minLength: 6
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - givenName
+        - familyName
+        - email
+        - password
+    Post:
+      title: Post
+      type: object
+      example:
+        - id: e19be0b6-1263-4ac1-930e-df34d2277b7b
+          title: Amazing post
+          body: This is the content of an amazing post
+          status: online
+          tags:
+            - nodejs
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+          enum:
+            - online
+            - offline
+        tags:
+          type: array
+          minItems: 0
+          maxItems: 5
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 2
+            maxLength: 20
+            pattern: '^[A-Za-z0-9]{2,20}$'
+            example: nodejs
+      required:
+        - id
+        - title
+        - body
+        - status
+        - tags
+    PostWithoutId:
+      title: PostWithoutId
+      type: object
+      example:
+        - title: Amazing post
+          body: This is the content of an amazing post
+          status: online
+          tags:
+            - nodejs
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+          enum:
+            - online
+            - offline
+        tags:
+          type: array
+          minItems: 0
+          maxItems: 5
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 2
+            maxLength: 20
+            pattern: '^[A-Za-z0-9]{2,20}$'
+            example: nodejs
+      required:
+        - title
+        - body
+        - status
+        - tags
+    PostComment:
+      title: PostComment
+      type: object
+      example:
+        - text: "Great content! :-)"
+      properties:
+        text:
+          type: string
+      required:
+        - text
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+  parameters:
+    Content-Type:
+      name: Content-Type
+      in: header
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+    page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minLength: 0
+        minimum: 0
+        multipleOf: 1
+        format: int32
+    perPage:
+      name: perPage
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        multipleOf: 1
+        format: int32
+    Accept:
+      name: Accept
+      in: header
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+security:
+  - jwt: [ ]

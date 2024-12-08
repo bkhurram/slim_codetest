@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+      args:
+        - INSTALL_XDEBUG=true
+      context: ./docker/php/
+      dockerfile: Dockerfile
+    ports:
+      - '${APP_PORT:-3000}:80'
+    environment:
+      PHP_IDE_CONFIG: serverName=qwentes-codetest
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - qwentes-codetest
+    depends_on:
+      - mysql
+
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - './docker/mysql/volumes:/var/lib/mysql'
+    networks:
+      - qwentes-codetest
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - qwentes-codetest
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+    networks:
+      - qwentes-codetest
+
+networks:
+  qwentes-codetest:
+    driver: 'bridge'
