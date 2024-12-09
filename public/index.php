@@ -21,9 +21,9 @@ $containerBuilder = new ContainerBuilder();
 $settings = require __DIR__ . '/../app/settings.php';
 $settings($containerBuilder);
 
-// Set up dependencies
-$dependencies = require __DIR__ . '/../app/dependencies.php';
-$dependencies($containerBuilder);
+// Set up logger
+$logger = require __DIR__ . '/../app/logger.php';
+$logger($containerBuilder);
 
 // Register validation
 $validation = require __DIR__ . '/../app/validation.php';

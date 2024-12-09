@@ -56,7 +56,7 @@ class UserUpdateAction extends Action
 			$connection->commit(); // Commit the transaction
 		} catch (\Exception $e) {
 			$connection->rollBack(); // Rollback the transaction on error
-			$this->logger->info("Fail update user: " . $e->getMessage());
+			$this->logger->error("Fail update user: " . $e->getMessage());
 			throw new HttpInternalServerErrorException($this->request);
 		}
 
