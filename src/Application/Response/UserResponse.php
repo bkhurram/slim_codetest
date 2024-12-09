@@ -15,7 +15,11 @@ class UserResponse
 	 */
 	public function map(User $user): array
 	{
-		$date = new DateTime($user->createdAt, new DateTimeZone('UTC')); // Set the timezone if needed
+		$date = null;
+		if(isset($user->createdAt)) {
+			$date = new DateTime($user->createdAt, new DateTimeZone('UTC'));
+			$date = $date->format('Y-m-d\TH:i:s\Z');
+		}
 
 		return [
 			'name'        => $user->name,
@@ -23,7 +27,7 @@ class UserResponse
 			'familyName'  => $user->familyName,
 			'email'       => $user->email,
 			'dateOfBirth' => $user->dateOfBirth,
-			'createdAt'   => $date->format('Y-m-d\TH:i:s\Z'),
+			'createdAt'   => $date,
 			"address"     => $user->address ?
 				(new AddressResponse())->map($user->address)
 				: null,
