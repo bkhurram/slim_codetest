@@ -152,11 +152,13 @@ class PostsController extends BaseController
 	{
 		// Define the validation rules
 		$rules = [
-			"id"     => ['nullable','string'],
+			"id"     => ['nullable','string'], // if null generate uuid
 			"title"  => ['required','string'],
 			"body"   => ['required','string'],
 			"status" => ['required','string', Rule::in([Post::STATUS_ONLINE, Post::STATUS_OFFLINE])],
 			"tags"   => ['required',"array","min:0","max:5"],
+			'tags.*' => ['required', 'string', 'distinct'], // Each item must be a unique string
+
 		];
 
 		$messages = [
@@ -165,6 +167,8 @@ class PostsController extends BaseController
 			'status.required' => 'Status is required.',
 			'status.in'       => 'Status is not valid.',
 			'tags.required'   => 'Tags is required.',
+			'tags.*.distinct' => 'Tags item in the list must be unique.',
+
 		];
 
 		// Validate the data
