@@ -2,6 +2,8 @@
 
 namespace App\Application\Actions;
 
+use App\Application\Services\ValidatorService;
+use DI\NotFoundException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -11,6 +13,7 @@ use Slim\Exception\HttpNotFoundException;
 abstract class Action
 {
     protected LoggerInterface $logger;
+	protected ValidatorService $validator;
 
     protected Request $request;
 
@@ -18,9 +21,10 @@ abstract class Action
 
     protected array $args;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ValidatorService $validator)
     {
         $this->logger = $logger;
+		$this->validator = $validator;
     }
 
     /**
@@ -35,13 +39,12 @@ abstract class Action
 
         try {
             return $this->action();
-        } catch (DomainRecordNotFoundException $e) {
+        } catch (NotFoundException $e) {
             throw new HttpNotFoundException($this->request, $e->getMessage());
         }
     }
 
     /**
-     * @throws DomainRecordNotFoundException
      * @throws HttpBadRequestException
      */
     abstract protected function action(): Response;

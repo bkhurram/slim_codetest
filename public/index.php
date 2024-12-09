@@ -25,6 +25,10 @@ $settings($containerBuilder);
 $dependencies = require __DIR__ . '/../app/dependencies.php';
 $dependencies($containerBuilder);
 
+// Register validation
+$validation = require __DIR__ . '/../app/validation.php';
+$validation($containerBuilder);
+
 // Build PHP-DI Container instance
 $container = $containerBuilder->build();
 
@@ -36,6 +40,10 @@ $callableResolver = $app->getCallableResolver();
 // Register eloquent database
 $eloquent = require __DIR__ . '/../app/eloquent.php';
 $eloquent($container);
+
+// Register validation
+//$validation = require __DIR__ . '/../app/validation.php';
+//$validation($container);
 
 // Register middleware
 $middleware = require __DIR__ . '/../app/middleware.php';

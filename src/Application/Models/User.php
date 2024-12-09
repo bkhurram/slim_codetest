@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class User extends Model
 {
 	protected $fillable = [
-		'giveName',
+		'givenName',
 		'familyName',
 		'email',
 		'password',
@@ -44,7 +44,7 @@ class User extends Model
 
 	public function getNameAttribute()
 	{
-		return trim("$this->giveName $this->familyName");
+		return trim("$this->givenName $this->familyName");
 	}
 
 }

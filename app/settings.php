@@ -38,7 +38,7 @@ return function (ContainerBuilder $containerBuilder) {
 					'prefix'                  => '',
 					'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
 				],
-            ]);
-        }
-    ]);
+			]);
+		}
+	]);
 };

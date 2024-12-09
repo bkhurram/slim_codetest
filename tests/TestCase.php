@@ -19,6 +19,8 @@ class TestCase extends PHPUnit_TestCase
 {
 	use ProphecyTrait;
 
+	protected $container;
+
 	/**
 	 * @return App
 	 * @throws Exception

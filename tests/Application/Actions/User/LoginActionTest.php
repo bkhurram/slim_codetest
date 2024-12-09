@@ -31,7 +31,7 @@ class LoginActionTest extends TestCase
 		// Create SQLite database schema
 		$capsule::schema()->create('users', function ($table) {
 			$table->increments('id');
-			$table->string('giveName')->nullable();
+			$table->string('givenName')->nullable();
 			$table->string('familyName')->nullable();
 			$table->string('email')->unique();
 			$table->string('password');
@@ -57,7 +57,7 @@ class LoginActionTest extends TestCase
 		$this->setUpDatabase($container);
 
 		$data  = [
-			'giveName'   => 'John',
+			'givenName'   => 'John',
 			'familyName'  => 'Doe',
 			'email'       => 'johndoe@example.com',
 			'password'    => 'password',
