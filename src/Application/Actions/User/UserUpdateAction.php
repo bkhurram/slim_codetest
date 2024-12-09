@@ -9,14 +9,22 @@ use App\Application\Models\UserAddress;
 use App\Application\Validation\Rules\EmailUnique;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 
-class UserCreateAction extends Action
+class UserUpdateAction extends Action
 {
 	public function action(): Response
 	{
+		$email = $this->args['email'];
+
 		$data = $this->getFormData();
-		$this->validateFormData($data);
+		$this->validateFormData($email, $data);
+
+//		$userId = $this->request->getAttribute('userId');
+//		if(!User::where('id', $userId)->where('email', $email)->exists()) {
+//			throw new HttpForbiddenException($this->request, 'User not enable for update');
+//		}
 
 		$userdata = Arr::where($data, function ($value) { return $value !== null && $value !== ''; }); // remove empty data from array
 		$userdata = Arr::except($userdata, ['password', 'address']);
@@ -25,10 +33,9 @@ class UserCreateAction extends Action
 
 		try{
 			$connection->beginTransaction(); // Start the transaction
-			// Store user
-			$user = new User();
+			// update user
+			$user = User::firstWhere('email', $email);
 			$user->forceFill($userdata);
-			$user->password = password_hash($data['password'], PASSWORD_BCRYPT);
 			$user->save();
 
 			$address = $data['address'];
@@ -36,45 +43,28 @@ class UserCreateAction extends Action
 			$userAddressData['lat'] = Arr::get($address, 'coordinates.lat');
 			$userAddressData['lng'] = Arr::get($address, 'coordinates.lng');
 
-			$userAddress = new UserAddress();
+			$userAddress = $user->address;
 			$userAddress->forceFill($userAddressData);
-			$userAddress->user()->associate($user);
 			$userAddress->save();
 
 			$connection->commit(); // Commit the transaction
 		} catch (\Exception $e) {
 			$connection->rollBack(); // Rollback the transaction on error
-			$this->logger->info("Fail create user: " . $e->getMessage());
+			$this->logger->info("Fail update user: " . $e->getMessage());
 			throw new HttpInternalServerErrorException($this->request);
 		}
 
-		return $this->respondWithData($user, 201);
+		return $this->respondWithData($user, 202);
 	}
 
-	private function validateFormData(array $data)
+	private function validateFormData(string $email, array $data)
 	{
 		// Define the validation rules
 		$rules = [
 			'givenName'   => ['required','string'],
 			'familyName'  => ['required','string'],
-			'email'       => ['required','email', new EmailUnique()],
+			'email'       => ['required','email', new EmailUnique($this->request->getAttribute('userId'))],
 			'dateOfBirth' => ['nullable', 'date_format:Y-m-d'],
-			'password'    => [
-				'required',
-				'string',
-				'min:6',  // Minimum length of 6 characters
-				'regex:/[0-9]/',  // At least one number
-				'regex:/[a-z]/',  // At least one lowercase letter
-				'regex:/[A-Z]/',  // At least one uppercase letter
-				'regex:/(?:[^,.:;\-_$%&()=]*[,.:;\-_$%&()=]){2}/', // 2 special characters
-				'regex:/^(?!.*([a-zA-Z0-9])\1{1}).*$/',  // No consecutive identical characters
-				function ($attribute, $value, $fail) use ($data) { // Email local-part can't be part of password
-					$emailPrefix = preg_quote(explode('@', $data['email'])[0]);
-					if (str_contains($value, $emailPrefix)) {
-						$fail('The password cannot contain the prefix of your email address.');
-					}
-				},
-			],
 
 			"address.street"          => ['required','string', 'min:3'],
 			"address.city"            => ['required','string', 'min:3'],
@@ -90,9 +80,6 @@ class UserCreateAction extends Action
 			'email.required'      => 'Email is required.',
 			'email.email'         => 'Please provide a valid email address.',
 			'dateOfBirth.date_format'    => 'Please provide a valid date of birth.',
-			'password.required'   => 'Password is required.',
-			'password.min'        => 'Minimum 6 characters.',
-			'password.regex'      => 'The password does not meet the required security criteria.',
 
 			'address.street.required'          => 'Street is required.',
 			'address.street.min'               => 'Street must be at least 3 characters.',
