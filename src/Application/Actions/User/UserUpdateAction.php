@@ -11,12 +11,18 @@ use Illuminate\Support\Arr;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
+use Slim\Exception\HttpNotFoundException;
 
 class UserUpdateAction extends Action
 {
 	public function action(): Response
 	{
 		$email = $this->args['email'];
+
+		$user = User::firstWhere('email', $email);
+		if (!$user) {
+			throw new HttpNotFoundException($this->request, 'Email not found');
+		}
 
 		$data = $this->getFormData();
 		$this->validateFormData($email, $data);

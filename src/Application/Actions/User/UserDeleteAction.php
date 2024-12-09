@@ -6,6 +6,7 @@ use App\Application\Actions\Action;
 use App\Application\Models\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Exception\HttpBadRequestException;
+use Slim\Exception\HttpNotFoundException;
 
 class UserDeleteAction extends Action
 {
@@ -16,7 +17,7 @@ class UserDeleteAction extends Action
 		// remove user
 		$user = User::firstWhere('email', $email);
 		if (!$user) {
-			throw new HttpBadRequestException($this->request, 'Email not found');
+			throw new HttpNotFoundException($this->request, 'Email not found');
 		}
 
 		$user->delete();
