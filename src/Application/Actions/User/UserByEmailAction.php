@@ -5,6 +5,8 @@ namespace App\Application\Actions\User;
 use App\Application\Actions\Action;
 use App\Application\Models\User;
 use App\Application\Response\PaginateResponse;
+use App\Application\Response\PostResponse;
+use App\Application\Response\UserResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
@@ -23,6 +25,7 @@ class UserByEmailAction extends Action
 			throw new HttpNotFoundException($this->request, 'Email not found');
 		}
 
-		return $this->respondWithData($user->with(['address'])->first());
+		$results = (new UserResponse())->map($user->first());
+		return $this->respondWithData($results);
 	}
 }

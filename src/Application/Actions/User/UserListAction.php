@@ -5,6 +5,8 @@ namespace App\Application\Actions\User;
 use App\Application\Actions\Action;
 use App\Application\Models\User;
 use App\Application\Response\PaginateResponse;
+use App\Application\Response\PostCollectionResponse;
+use App\Application\Response\UserCollectionResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class UserListAction extends Action
@@ -27,6 +29,9 @@ class UserListAction extends Action
 		$perPage = isset($params['perPage']) ? (int)$params['perPage'] : 10;
 		$items = $query->paginate(perPage: $perPage, page: $page);
 
-		return $this->respondWithData(new PaginateResponse($items));
+		$ucr = new UserCollectionResponse();
+		$mappedData = $ucr->map($items->items());
+
+		return $this->respondWithData(new PaginateResponse($items, $mappedData));
 	}
 }

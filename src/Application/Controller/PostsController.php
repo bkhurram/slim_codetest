@@ -6,6 +6,8 @@ use App\Application\Exception\HttpUnprocessableException;
 use App\Application\Models\Post;
 use App\Application\Models\Tag;
 use App\Application\Response\PaginateResponse;
+use App\Application\Response\PostCollectionResponse;
+use App\Application\Response\PostResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Psr\Http\Message\RequestInterface as Request;
@@ -41,7 +43,10 @@ class PostsController extends BaseController
 		$perPage = isset($params['perPage']) ? (int)$params['perPage'] : 10;
 		$items = $query->paginate(perPage: $perPage, page: $page);
 
-		return $this->respondWithData($response, new PaginateResponse($items));
+		$pcr = new PostCollectionResponse();
+		$mappedData = $pcr->map($items->items());
+
+		return $this->respondWithData($response, new PaginateResponse($items, $mappedData));
 	}
 
 	public function store(Request $request, Response $response)
@@ -91,7 +96,7 @@ class PostsController extends BaseController
 			throw new HttpNotFoundException($request, 'Post not found');
 		}
 
-		return $this->respondWithData($response, $post);
+		return $this->respondWithData($response, (new PostResponse())->map($post));
 	}
 
 	public function update(Request $request, Response $response, array $args)

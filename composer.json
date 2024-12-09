@@ -7,6 +7,7 @@
         "doctrine/orm": "*",
         "illuminate/database": "^11.34",
         "illuminate/events": "^11.34",
+        "illuminate/http": "^11.34",
         "illuminate/pagination": "^11.34",
         "illuminate/support": "^11.34",
         "illuminate/validation": "^11.34",
