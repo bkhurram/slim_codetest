@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Exception\HttpUnauthorizedException;
 
 class AuthMiddleware implements Middleware
 {
@@ -32,6 +33,12 @@ class AuthMiddleware implements Middleware
 				throw new \Exception('Invalid Token');
 			}
 			$decoded = $jwtService->decodeToken($token);
+
+			# check token expire
+			if (time() > $decoded['exp']) {
+				throw new HttpUnauthorizedException($request, 'Token expired');
+			}
+
 			$request = $request->withAttribute('userId', $decoded['sub']);
 
 			// $user = User::findOrFail($decoded['sub']);
