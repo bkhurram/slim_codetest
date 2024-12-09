@@ -18,12 +18,12 @@ class ActionError implements JsonSerializable
 
     private string $type;
 
-    private ?string $description;
+    private string|null|object $message = null;
 
-    public function __construct(string $type, ?string $description = null)
+    public function __construct(string $type, ?string $message = null)
     {
         $this->type = $type;
-        $this->description = $description;
+        $this->message = $message;
     }
 
     public function getType(): string
@@ -37,23 +37,29 @@ class ActionError implements JsonSerializable
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getMessage(): ?string
     {
-        return $this->description;
+        return (string) $this->message;
     }
 
-    public function setDescription(?string $description = null): self
+    public function setMessage(?string $message = null): self
     {
-        $this->description = $description;
+        $this->message = $message;
         return $this;
     }
+
+	public function setJsonMessage(?string $message = null): self
+	{
+		$this->message = json_decode($message);
+		return $this;
+	}
 
     #[\ReturnTypeWillChange]
     public function jsonSerialize(): array
     {
         return [
             'type' => $this->type,
-            'description' => $this->description,
+            'message' => $this->message,
         ];
     }
 }

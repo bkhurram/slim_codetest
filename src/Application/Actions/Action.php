@@ -4,6 +4,7 @@ namespace App\Application\Actions;
 
 use App\Application\Services\ValidatorService;
 use DI\NotFoundException;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -14,6 +15,7 @@ abstract class Action
 {
     protected LoggerInterface $logger;
 	protected ValidatorService $validator;
+	protected Capsule $capsule;
 
     protected Request $request;
 
@@ -21,10 +23,11 @@ abstract class Action
 
     protected array $args;
 
-    public function __construct(LoggerInterface $logger, ValidatorService $validator)
+    public function __construct(LoggerInterface $logger, ValidatorService $validator, Capsule $capsule)
     {
         $this->logger = $logger;
 		$this->validator = $validator;
+		$this->capsule = $capsule;
     }
 
     /**

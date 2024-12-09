@@ -4,6 +4,7 @@ namespace App\Application\Handlers;
 
 use App\Application\Actions\ActionError;
 use App\Application\Actions\ActionPayload;
+use App\Application\Exception\HttpUnprocessableException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpException;
@@ -31,7 +32,7 @@ class HttpErrorHandler extends SlimErrorHandler
 
 		if ($exception instanceof HttpException) {
 			$statusCode = $exception->getCode();
-			$error->setDescription($exception->getMessage());
+			$error->setMessage($exception->getMessage());
 
 			if ($exception instanceof HttpNotFoundException) {
 				$error->setType(ActionError::RESOURCE_NOT_FOUND);
@@ -45,6 +46,9 @@ class HttpErrorHandler extends SlimErrorHandler
 				$error->setType(ActionError::BAD_REQUEST);
 			} elseif ($exception instanceof HttpNotImplementedException) {
 				$error->setType(ActionError::NOT_IMPLEMENTED);
+			} elseif ($exception instanceof HttpUnprocessableException) {
+				$error->setType(ActionError::VALIDATION_ERROR);
+				$error->setJsonMessage($exception->getMessage());
 			}
 		}
 
@@ -53,7 +57,7 @@ class HttpErrorHandler extends SlimErrorHandler
 			&& $exception instanceof Throwable
 			&& $this->displayErrorDetails
 		) {
-			$error->setDescription($exception->getMessage());
+			$error->setMessage($exception->getMessage());
 		}
 
 		$payload = new ActionPayload($statusCode, null, $error);

@@ -41,10 +41,6 @@ $callableResolver = $app->getCallableResolver();
 $eloquent = require __DIR__ . '/../app/eloquent.php';
 $eloquent($container);
 
-// Register validation
-//$validation = require __DIR__ . '/../app/validation.php';
-//$validation($container);
-
 // Register middleware
 $middleware = require __DIR__ . '/../app/middleware.php';
 $middleware($app);

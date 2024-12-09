@@ -6,7 +6,7 @@ use JsonSerializable;
 
 class ActionPayload implements JsonSerializable
 {
-    private int $statusCode;
+    private int $status;
 
     /**
      * @var array|object|null
@@ -20,14 +20,14 @@ class ActionPayload implements JsonSerializable
         $data = null,
         ?ActionError $error = null
     ) {
-        $this->statusCode = $statusCode;
+        $this->status = $statusCode;
         $this->data = $data;
         $this->error = $error;
     }
 
     public function getStatusCode(): int
     {
-        return $this->statusCode;
+        return $this->status;
     }
 
     /**
@@ -47,7 +47,7 @@ class ActionPayload implements JsonSerializable
     public function jsonSerialize(): array
     {
         $payload = [
-            'statusCode' => $this->statusCode,
+            'status' => $this->status,
         ];
 
         if ($this->data !== null) {

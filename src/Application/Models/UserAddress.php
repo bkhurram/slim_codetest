@@ -15,11 +15,16 @@ class UserAddress extends Model
 		'city',
 		'post_code',
 		'country_code',
-		'latitude',
-		'longitude'
+		'lat',
+		'lng'
 	];
 
 	protected $hidden = ['id'];
 
 	public $timestamps = false;
+
+	protected $casts = [
+		'lat' => 'float',
+		'lng' => 'float'
+	];
 }
