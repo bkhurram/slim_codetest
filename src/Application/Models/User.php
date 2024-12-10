@@ -39,7 +39,11 @@ class User extends Model
 
 	public function address(): HasOne
 	{
-		return $this->hasOne(UserAddress::class, 'userId');
+		return $this->hasOne(UserAddress::class);
+	}
+
+	public function posts() {
+		return $this->hasMany(Post::class);
 	}
 
 	public function getNameAttribute()

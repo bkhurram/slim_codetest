@@ -10,7 +10,7 @@ class UserAddress extends Model
 	use HasUser;
 
 	protected $fillable = [
-		'userId',
+		'user_id',
 		'street',
 		'city',
 		'post_code',

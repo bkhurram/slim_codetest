@@ -45,6 +45,7 @@
         }
     },
     "scripts": {
+		"root-user": "php bin/console.php user:create root root my.root@gmail.com password",
         "test": "phpunit"
     }
 }

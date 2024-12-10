@@ -6,6 +6,7 @@ use App\Application\Actions\Action;
 use App\Application\Exception\HttpUnprocessableException;
 use App\Application\Models\User;
 use App\Application\Models\UserAddress;
+use App\Application\Response\UserResponse;
 use App\Application\Validation\Rules\EmailUnique;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -45,13 +46,16 @@ class UserUpdateAction extends Action
 			$user->save();
 
 			$address = $data['address'];
-			$userAddressData = Arr::except($address, 'coordinates');
-			$userAddressData['lat'] = Arr::get($address, 'coordinates.lat');
-			$userAddressData['lng'] = Arr::get($address, 'coordinates.lng');
+			if($address) {
+				$userAddressData = Arr::except($address, 'coordinates');
+				$userAddressData['lat'] = Arr::get($address, 'coordinates.lat');
+				$userAddressData['lng'] = Arr::get($address, 'coordinates.lng');
 
-			$userAddress = $user->address;
-			$userAddress->forceFill($userAddressData);
-			$userAddress->save();
+				$userAddress = $user->address ?? new UserAddress(); // update or create new
+				$userAddress->user()->associate($user);
+				$userAddress->forceFill($userAddressData);
+				$userAddress->save();
+			}
 
 			$connection->commit(); // Commit the transaction
 		} catch (\Exception $e) {
@@ -60,16 +64,19 @@ class UserUpdateAction extends Action
 			throw new HttpInternalServerErrorException($this->request);
 		}
 
-		return $this->respondWithData($user, 202);
+		return $this->respondWithData((new UserResponse())->map($user), 202);
 	}
 
 	private function validateFormData(string $email, array $data)
 	{
+		// auth user
+		$user = $this->request->getAttribute('user');
+
 		// Define the validation rules
 		$rules = [
 			'givenName'   => ['required','string'],
 			'familyName'  => ['required','string'],
-			'email'       => ['required','email', new EmailUnique($this->request->getAttribute('userId'))],
+			'email'       => ['required','email', new EmailUnique($user->id)],
 			'dateOfBirth' => ['nullable', 'date_format:Y-m-d'],
 
 			"address.street"          => ['required','string', 'min:3'],

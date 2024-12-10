@@ -9,11 +9,11 @@ trait HasUser
 {
     public function initializeHasUser(): void
     {
-        $this->hidden[] = 'userId';
+        $this->hidden[] = 'user_id';
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'userId');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

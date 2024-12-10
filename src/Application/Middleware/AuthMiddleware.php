@@ -4,6 +4,7 @@ namespace App\Application\Middleware;
 
 use App\Application\Services\JwtService;
 use App\Application\Models\User;
+use Illuminate\Support\Carbon;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -34,15 +35,17 @@ class AuthMiddleware implements Middleware
 			}
 			$decoded = $jwtService->decodeToken($token);
 
+			// $tokenExpire = Carbon::parse($decoded['exp'])->toDateTime();
+
 			# check token expire
 			if (time() > $decoded['exp']) {
 				throw new HttpUnauthorizedException($request, 'Token expired');
 			}
 
-			$request = $request->withAttribute('userId', $decoded['sub']);
+//			 $request = $request->withAttribute('userId', $decoded['sub']);
 
-			// $user = User::findOrFail($decoded['sub']);
-			// $request = $request->withAttribute('user', $user);
+			$user = User::findOrFail($decoded['sub']);
+			$request = $request->withAttribute('user', $user);
 		} catch (\Exception $e) {
 			$response = new \Slim\Psr7\Response();
 			$response->getBody()->write(json_encode(['error' => 'Token invalid or expired']));

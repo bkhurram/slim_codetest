@@ -9,6 +9,3 @@ ssh:
 
 test:
 	./vendor/bin/phpunit --verbose tests
-
-root-user:
-	php bin/console.php user:create root root my.root@gmail.com password

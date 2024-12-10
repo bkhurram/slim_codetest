@@ -5,6 +5,7 @@ namespace App\Application\Controller;
 use App\Application\Exception\HttpUnprocessableException;
 use App\Application\Models\Post;
 use App\Application\Models\Tag;
+use App\Application\Models\User;
 use App\Application\Response\PaginateResponse;
 use App\Application\Response\PostCollectionResponse;
 use App\Application\Response\PostResponse;
@@ -20,7 +21,11 @@ class PostsController extends BaseController
 	public function index(Request $request, Response $response)
 	{
 		$params = $request->getQueryParams();
-		$query = Post::query()->with(['tags']);
+
+		/** @var User $user */
+		$user = $request->getAttribute('user');
+
+		$query = $user->posts()->with(['tags']);
 
 		if (isset($params['tags'])) {
 			$tags = $params['tags'];
@@ -63,7 +68,12 @@ class PostsController extends BaseController
 			if(isset($data['id'])) {
 				$post->uuid = $data['id'];
 			}
+
+			/** @var User $user get auth user */
+			$user = $request->getAttribute('user');
+
 			$post->fill(Arr::except($data, ['id', 'tags']));
+			$post->user()->associate($user);
 			$post->save();
 
 			$tags = $data['tags'];
@@ -91,7 +101,11 @@ class PostsController extends BaseController
 	{
 		$uuid = $args['id'];
 
-		$post = Post::firstWhere('uuid', $uuid);
+		// get auth user
+		/** @var User $user */
+		$user = $request->getAttribute('user');
+
+		$post = $user->posts()->where('uuid', $uuid)->first();
 		if (!$post) {
 			throw new HttpNotFoundException($request, 'Post not found');
 		}
@@ -103,7 +117,10 @@ class PostsController extends BaseController
 	{
 		$uuid = $args['id'];
 
-		$post = Post::firstWhere('uuid', $uuid);
+		/** @var User $user get auth user */
+		$user = $request->getAttribute('user');
+
+		$post = $user->posts()->where('uuid', $uuid)->first();
 		if (!$post) {
 			throw new HttpNotFoundException($request, 'Post not found');
 		}
@@ -136,14 +153,17 @@ class PostsController extends BaseController
 			throw new HttpInternalServerErrorException($request);
 		}
 
-		return $this->respondWithData($response, $post);
+		return $this->respondWithData($response, (new PostResponse())->map($post));
 	}
 
 	public function delete(Request $request, Response $response, array $args): Response
 	{
 		$uuid = $args['id'];
 
-		$post = Post::firstWhere('uuid', $uuid);
+		/** @var User $user get auth user */
+		$user = $request->getAttribute('user');
+
+		$post = $user->posts()->where('uuid', $uuid)->first();
 		if (!$post) {
 			throw new HttpNotFoundException($request, 'Post not found');
 		}
