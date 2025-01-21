@@ -28,7 +28,7 @@ class UserResponse
             'email'       => $user->email,
             'dateOfBirth' => $user->dateOfBirth,
             'createdAt'   => $date,
-            "address"     => $user->address ?
+            'address'     => $user->address ?
                 (new AddressResponse())->map($user->address)
                 : null,
         ];

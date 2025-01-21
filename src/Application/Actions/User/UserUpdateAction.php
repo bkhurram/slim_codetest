@@ -60,7 +60,7 @@ class UserUpdateAction extends Action
             $connection->commit(); // Commit the transaction
         } catch (\Exception $e) {
             $connection->rollBack(); // Rollback the transaction on error
-            $this->logger->error("Fail update user: " . $e->getMessage());
+            $this->logger->error('Fail update user: ' . $e->getMessage());
             throw new HttpInternalServerErrorException($this->request);
         }
 
@@ -79,12 +79,12 @@ class UserUpdateAction extends Action
             'email'       => ['required', 'email', new EmailUnique($user->id)],
             'dateOfBirth' => ['nullable', 'date_format:Y-m-d'],
 
-            "address.street"          => ['required', 'string', 'min:3'],
-            "address.city"            => ['required', 'string', 'min:3'],
-            "address.postCode"        => ['required', 'string', 'min:3'],
-            "address.countryCode"     => ['required', 'string', 'min:2', 'max:2', 'regex:/[A-Z]{2}/'],
-            "address.coordinates.lat" => ['required', 'string'],
-            "address.coordinates.lng" => ['required', 'string'],
+            'address.street'          => ['required', 'string', 'min:3'],
+            'address.city'            => ['required', 'string', 'min:3'],
+            'address.postCode'        => ['required', 'string', 'min:3'],
+            'address.countryCode'     => ['required', 'string', 'min:2', 'max:2', 'regex:/[A-Z]{2}/'],
+            'address.coordinates.lat' => ['required', 'string'],
+            'address.coordinates.lng' => ['required', 'string'],
         ];
 
         $messages = [

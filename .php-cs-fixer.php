@@ -124,6 +124,7 @@ $rules = [
 	'visibility_required' => [
 		'elements' => ['method', 'property'],
 	],
+	'single_quote' => true,
 	'whitespace_after_comma_in_array' => true,
 	'no_unused_imports' => true,
 ];
@@ -147,4 +148,5 @@ return (new Config())
 	->setFinder($finder)
 	->setRules($rules)
 	->setRiskyAllowed(true)
+	->setLineEnding("\n")
 	->setUsingCache(true);

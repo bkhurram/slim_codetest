@@ -10,6 +10,7 @@ use App\Application\Response\PaginateResponse;
 use App\Application\Response\PostCollectionResponse;
 use App\Application\Response\PostResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -56,6 +57,7 @@ class PostsController extends BaseController
 
     public function store(Request $request, Response $response)
     {
+        Log::info('creating post');
         $data = $this->getFormData($request);
         $this->validateFormData($request, $data ?? []);
 
@@ -89,7 +91,7 @@ class PostsController extends BaseController
             $connection->commit(); // Commit the transaction
         } catch (\Exception $e) {
             $connection->rollBack(); // Rollback the transaction on error
-            $this->logger->error("Fail create post: " . $e->getMessage());
+            $this->logger->error('Fail create post: ' . $e->getMessage());
             throw new HttpInternalServerErrorException($request);
         }
 
@@ -149,7 +151,7 @@ class PostsController extends BaseController
             $connection->commit(); // Commit the transaction
         } catch (\Exception $e) {
             $connection->rollBack(); // Rollback the transaction on error
-            $this->logger->error("Fail create post: " . $e->getMessage());
+            $this->logger->error('Fail create post: ' . $e->getMessage());
             throw new HttpInternalServerErrorException($request);
         }
 
@@ -177,11 +179,11 @@ class PostsController extends BaseController
     {
         // Define the validation rules
         $rules = [
-            "id"     => ['nullable', 'string'], // if null generate uuid
-            "title"  => ['required', 'string'],
-            "body"   => ['required', 'string'],
-            "status" => ['required', 'string', Rule::in([Post::STATUS_ONLINE, Post::STATUS_OFFLINE])],
-            "tags"   => ['required', "array", "min:0", "max:5"],
+            'id'     => ['nullable', 'string'], // if null generate uuid
+            'title'  => ['required', 'string'],
+            'body'   => ['required', 'string'],
+            'status' => ['required', 'string', Rule::in([Post::STATUS_ONLINE, Post::STATUS_OFFLINE])],
+            'tags'   => ['required', 'array', 'min:0', 'max:5'],
             'tags.*' => ['required', 'string', 'distinct'], // Each item must be a unique string
 
         ];
@@ -196,7 +198,7 @@ class PostsController extends BaseController
 
         ];
 
-        // Validate the data
+		// Validate the data
         $errors = $this->validator->validate($data, $rules, $messages);
         if($errors) {
             throw new HttpUnprocessableException($request, $errors);

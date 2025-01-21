@@ -44,7 +44,7 @@ class UserCreateAction extends Action
             $connection->commit(); // Commit the transaction
         } catch (\Exception $e) {
             $connection->rollBack(); // Rollback the transaction on error
-            $this->logger->error("Fail create user: " . $e->getMessage());
+            $this->logger->error('Fail create user: ' . $e->getMessage());
             throw new HttpInternalServerErrorException($this->request);
         }
 
@@ -76,12 +76,12 @@ class UserCreateAction extends Action
                 },
             ],
 
-            "address.street"          => ['required', 'string', 'min:3'],
-            "address.city"            => ['required', 'string', 'min:3'],
-            "address.postCode"        => ['required', 'string', 'min:3'],
-            "address.countryCode"     => ['required', 'string', 'min:2', 'max:2', 'regex:/[A-Z]{2}/'],
-            "address.coordinates.lat" => ['required', 'string'],
-            "address.coordinates.lng" => ['required', 'string'],
+            'address.street'          => ['required', 'string', 'min:3'],
+            'address.city'            => ['required', 'string', 'min:3'],
+            'address.postCode'        => ['required', 'string', 'min:3'],
+            'address.countryCode'     => ['required', 'string', 'min:2', 'max:2', 'regex:/[A-Z]{2}/'],
+            'address.coordinates.lat' => ['required', 'string'],
+            'address.coordinates.lng' => ['required', 'string'],
         ];
 
         $messages = [

@@ -105,7 +105,7 @@ class TestCase extends PHPUnit_TestCase
         string $uri,
         array $data = null
     ) {
-        $request = $this->createRequest("POST", $uri);
+        $request = $this->createRequest('POST', $uri);
 
         if ($data !== null) {
             $request = $request->withParsedBody($data);

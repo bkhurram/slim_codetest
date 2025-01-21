@@ -20,7 +20,7 @@ class LoginAction extends Action
         $user = User::firstWhere('email', $data['email']);
         if(!$user || !password_verify($data['password'], $user->password)){
             // user not found or invalid password
-            throw new HttpBadRequestException($this->request, "Error on login, please check credentials.");
+            throw new HttpBadRequestException($this->request, 'Error on login, please check credentials.');
         }
 
         $this->logger->info("Login: $user->email");

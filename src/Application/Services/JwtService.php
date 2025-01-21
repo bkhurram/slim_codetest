@@ -11,7 +11,7 @@ class JwtService
 
     public function createToken($payload)
     {
-        $base64UrlHeader = $this->base64UrlEncode(json_encode(["alg" => "HS256", "typ" => "JWT"]));
+        $base64UrlHeader = $this->base64UrlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $base64UrlPayload = $this->base64UrlEncode(json_encode($payload));
         $base64UrlSignature = hash_hmac('sha256', $base64UrlHeader . '.' . $base64UrlPayload, $this->secretKey, true);
         $base64UrlSignature = $this->base64UrlEncode($base64UrlSignature);
