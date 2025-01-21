@@ -9,26 +9,26 @@ use Illuminate\Support\Str;
 
 class Tag extends Model
 {
-	use HasSlug;
+    use HasSlug;
 
-	protected $fillable = [
-		'slug',
-		'name',
-	];
+    protected $fillable = [
+        'slug',
+        'name',
+    ];
 
-	protected $hidden = [
-		'id',
-	];
+    protected $hidden = [
+        'id',
+    ];
 
-	public $timestamps = false;
+    public $timestamps = false;
 
-	public function posts(): BelongsToMany
-	{
-		return $this->belongsToMany(Post::class);
-	}
+    public function posts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class);
+    }
 
-	public function generateSlug(): string
-	{
-		return Str::slug($this->name);
-	}
+    public function generateSlug(): string
+    {
+        return Str::slug($this->name);
+    }
 }

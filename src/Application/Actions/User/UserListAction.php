@@ -5,33 +5,32 @@ namespace App\Application\Actions\User;
 use App\Application\Actions\Action;
 use App\Application\Models\User;
 use App\Application\Response\PaginateResponse;
-use App\Application\Response\PostCollectionResponse;
 use App\Application\Response\UserCollectionResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class UserListAction extends Action
 {
-	/**
-	 * {@inheritdoc}
-	 */
-	protected function action(): Response
-	{
-		$params = $this->request->getQueryParams();
-		$query = User::query()->with(['address']);
+    /**
+     * @inheritdoc
+     */
+    protected function action(): Response
+    {
+        $params = $this->request->getQueryParams();
+        $query = User::query()->with(['address']);
 
-		if (isset($params['email'])) {
-			foreach ($params['email'] as $email) {
-				$query->orWhere('email', $email);
-			}
-		}
+        if (isset($params['email'])) {
+            foreach ($params['email'] as $email) {
+                $query->orWhere('email', $email);
+            }
+        }
 
-		$page = isset($params['page']) ? (int)$params['page'] : 1;
-		$perPage = isset($params['perPage']) ? (int)$params['perPage'] : 10;
-		$items = $query->paginate(perPage: $perPage, page: $page);
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $perPage = isset($params['perPage']) ? (int) $params['perPage'] : 10;
+        $items = $query->paginate(perPage: $perPage, page: $page);
 
-		$ucr = new UserCollectionResponse();
-		$mappedData = $ucr->map($items->items());
+        $ucr = new UserCollectionResponse();
+        $mappedData = $ucr->map($items->items());
 
-		return $this->respondWithData(new PaginateResponse($items, $mappedData));
-	}
+        return $this->respondWithData(new PaginateResponse($items, $mappedData));
+    }
 }

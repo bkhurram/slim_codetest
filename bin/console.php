@@ -1,8 +1,8 @@
 <?php
 
+use App\Application\Console\UserCreateCommand;
 use DI\ContainerBuilder;
 use Symfony\Component\Console\Application;
-use App\Application\Console\UserCreateCommand;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -29,14 +29,14 @@ $eloquent = require __DIR__ . '/../app/eloquent.php';
 $eloquent($container);
 
 try {
-	/** @var Application $application */
-	$app = $container->get(Application::class);
+    /** @var Application $application */
+    $app = $container->get(Application::class);
 
-	// Register your console commands here
-	$app->add($container->get(UserCreateCommand::class));
+    // Register your console commands here
+    $app->add($container->get(UserCreateCommand::class));
 
-	exit($app->run());
+    exit($app->run());
 } catch (Throwable $exception) {
-	echo $exception->getMessage();
-	exit(1);
+    echo $exception->getMessage();
+    exit(1);
 }

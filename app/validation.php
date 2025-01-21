@@ -7,11 +7,11 @@ use App\Application\Services\ValidatorService;
 //};
 
 
-return function (\DI\ContainerBuilder $containerBuilder) {
-	// Global Settings Object
-	$containerBuilder->addDefinitions([
-		ValidatorService::class => function () {
-			return new ValidatorService();
-		}
-	]);
+return function (DI\ContainerBuilder $containerBuilder) {
+    // Global Settings Object
+    $containerBuilder->addDefinitions([
+        ValidatorService::class => function () {
+            return new ValidatorService();
+        },
+    ]);
 };

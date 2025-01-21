@@ -18,189 +18,188 @@ use Slim\Exception\HttpNotFoundException;
 
 class PostsController extends BaseController
 {
-	public function index(Request $request, Response $response)
-	{
-		$params = $request->getQueryParams();
+    public function index(Request $request, Response $response)
+    {
+        $params = $request->getQueryParams();
 
-		/** @var User $user */
-		$user = $request->getAttribute('user');
+        /** @var User $user */
+        $user = $request->getAttribute('user');
 
-		$query = $user->posts()->with(['tags']);
+        $query = $user->posts()->with(['tags']);
 
-		if (isset($params['tags'])) {
-			$tags = $params['tags'];
-			$query->whereHas('tags', function ($query) use ($tags) {
-				$query->where('slug', $tags[0]);
-				for($i=1; $i<count($tags); $i++) {
-					$tag = $tags[$i];
-					$query->orWhere('slug', $tag);
-				}
-			});
-		}
+        if (isset($params['tags'])) {
+            $tags = $params['tags'];
+            $query->whereHas('tags', function ($query) use ($tags) {
+                $query->where('slug', $tags[0]);
+                for($i = 1; $i < count($tags); $i++) {
+                    $tag = $tags[$i];
+                    $query->orWhere('slug', $tag);
+                }
+            });
+        }
 
-		if (isset($params['q'])) {
-			$query->where('title', 'LIKE', '%' . $params['q'] . '%');
-			$query->orWhere('body', 'LIKE', '%' . $params['q'] . '%');
-		}
-
-
-		$page = isset($params['page']) ? (int)$params['page'] : 1;
-		$perPage = isset($params['perPage']) ? (int)$params['perPage'] : 10;
-		$items = $query->paginate(perPage: $perPage, page: $page);
-
-		$pcr = new PostCollectionResponse();
-		$mappedData = $pcr->map($items->items());
-
-		return $this->respondWithData($response, new PaginateResponse($items, $mappedData));
-	}
-
-	public function store(Request $request, Response $response)
-	{
-		$data = $this->getFormData($request);
-		$this->validateFormData($request, $data ?? []);
-
-		$connection = $this->capsule->getConnection();
-
-		try{
-			$connection->beginTransaction(); // Start the transaction
-
-			$post = new Post();
-			if(isset($data['id'])) {
-				$post->uuid = $data['id'];
-			}
-
-			/** @var User $user get auth user */
-			$user = $request->getAttribute('user');
-
-			$post->fill(Arr::except($data, ['id', 'tags']));
-			$post->user()->associate($user);
-			$post->save();
-
-			$tags = $data['tags'];
-			$tagIds = [];
-			foreach ($tags as $tag) {
-				$tag = Tag::firstOrCreate(['name' => $tag]);
-				$tagIds[] = $tag->id;
-			}
-
-			$post->tags()->sync($tagIds);
-			$post->save();
-
-			$connection->commit(); // Commit the transaction
-		} catch (\Exception $e) {
-			$connection->rollBack(); // Rollback the transaction on error
-			$this->logger->error("Fail create post: " . $e->getMessage());
-			throw new HttpInternalServerErrorException($request);
-		}
+        if (isset($params['q'])) {
+            $query->where('title', 'LIKE', '%' . $params['q'] . '%');
+            $query->orWhere('body', 'LIKE', '%' . $params['q'] . '%');
+        }
 
 
-		return $this->respondWithData($response, $post);
-	}
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $perPage = isset($params['perPage']) ? (int) $params['perPage'] : 10;
+        $items = $query->paginate(perPage: $perPage, page: $page);
 
-	public function view(Request $request, Response $response, array $args): Response
-	{
-		$uuid = $args['id'];
+        $pcr = new PostCollectionResponse();
+        $mappedData = $pcr->map($items->items());
 
-		// get auth user
-		/** @var User $user */
-		$user = $request->getAttribute('user');
+        return $this->respondWithData($response, new PaginateResponse($items, $mappedData));
+    }
 
-		$post = $user->posts()->where('uuid', $uuid)->first();
-		if (!$post) {
-			throw new HttpNotFoundException($request, 'Post not found');
-		}
+    public function store(Request $request, Response $response)
+    {
+        $data = $this->getFormData($request);
+        $this->validateFormData($request, $data ?? []);
 
-		return $this->respondWithData($response, (new PostResponse())->map($post));
-	}
+        $connection = $this->capsule->getConnection();
 
-	public function update(Request $request, Response $response, array $args)
-	{
-		$uuid = $args['id'];
+        try{
+            $connection->beginTransaction(); // Start the transaction
 
-		/** @var User $user get auth user */
-		$user = $request->getAttribute('user');
+            $post = new Post();
+            if(isset($data['id'])) {
+                $post->uuid = $data['id'];
+            }
 
-		$post = $user->posts()->where('uuid', $uuid)->first();
-		if (!$post) {
-			throw new HttpNotFoundException($request, 'Post not found');
-		}
+            /** @var User $user get auth user */
+            $user = $request->getAttribute('user');
 
-		$data = $this->getFormData($request);
-		$this->validateFormData($request, $data ?? []);
+            $post->fill(Arr::except($data, ['id', 'tags']));
+            $post->user()->associate($user);
+            $post->save();
 
-		$connection = $this->capsule->getConnection();
+            $tags = $data['tags'];
+            $tagIds = [];
+            foreach ($tags as $tag) {
+                $tag = Tag::firstOrCreate(['name' => $tag]);
+                $tagIds[] = $tag->id;
+            }
 
-		try{
-			$connection->beginTransaction(); // Start the transaction
+            $post->tags()->sync($tagIds);
+            $post->save();
 
-			$post->fill(Arr::except($data, ['id', 'tags']));
-			$post->save();
+            $connection->commit(); // Commit the transaction
+        } catch (\Exception $e) {
+            $connection->rollBack(); // Rollback the transaction on error
+            $this->logger->error("Fail create post: " . $e->getMessage());
+            throw new HttpInternalServerErrorException($request);
+        }
 
-			$tags = $data['tags'];
-			$tagIds = [];
-			foreach ($tags as $tag) {
-				$tag = Tag::firstOrCreate(['name' => $tag]);
-				$tagIds[] = $tag->id;
-			}
 
-			$post->tags()->sync($tagIds);
-			$post->save();
+        return $this->respondWithData($response, $post);
+    }
 
-			$connection->commit(); // Commit the transaction
-		} catch (\Exception $e) {
-			$connection->rollBack(); // Rollback the transaction on error
-			$this->logger->error("Fail create post: " . $e->getMessage());
-			throw new HttpInternalServerErrorException($request);
-		}
+    public function view(Request $request, Response $response, array $args): Response
+    {
+        $uuid = $args['id'];
 
-		return $this->respondWithData($response, (new PostResponse())->map($post));
-	}
+        // get auth user
+        /** @var User $user */
+        $user = $request->getAttribute('user');
 
-	public function delete(Request $request, Response $response, array $args): Response
-	{
-		$uuid = $args['id'];
+        $post = $user->posts()->where('uuid', $uuid)->first();
+        if (!$post) {
+            throw new HttpNotFoundException($request, 'Post not found');
+        }
 
-		/** @var User $user get auth user */
-		$user = $request->getAttribute('user');
+        return $this->respondWithData($response, (new PostResponse())->map($post));
+    }
 
-		$post = $user->posts()->where('uuid', $uuid)->first();
-		if (!$post) {
-			throw new HttpNotFoundException($request, 'Post not found');
-		}
+    public function update(Request $request, Response $response, array $args)
+    {
+        $uuid = $args['id'];
 
-		$post->delete();
+        /** @var User $user get auth user */
+        $user = $request->getAttribute('user');
 
-		return $this->respondWithData(null, 204);
-	}
+        $post = $user->posts()->where('uuid', $uuid)->first();
+        if (!$post) {
+            throw new HttpNotFoundException($request, 'Post not found');
+        }
 
-	private function validateFormData(Request $request, array $data): void
-	{
-		// Define the validation rules
-		$rules = [
-			"id"     => ['nullable','string'], // if null generate uuid
-			"title"  => ['required','string'],
-			"body"   => ['required','string'],
-			"status" => ['required','string', Rule::in([Post::STATUS_ONLINE, Post::STATUS_OFFLINE])],
-			"tags"   => ['required',"array","min:0","max:5"],
-			'tags.*' => ['required', 'string', 'distinct'], // Each item must be a unique string
+        $data = $this->getFormData($request);
+        $this->validateFormData($request, $data ?? []);
 
-		];
+        $connection = $this->capsule->getConnection();
 
-		$messages = [
-			'title.required'  => 'Title is required.',
-			'body.required'   => 'Content is required.',
-			'status.required' => 'Status is required.',
-			'status.in'       => 'Status is not valid.',
-			'tags.required'   => 'Tags is required.',
-			'tags.*.distinct' => 'Tags item in the list must be unique.',
+        try{
+            $connection->beginTransaction(); // Start the transaction
 
-		];
+            $post->fill(Arr::except($data, ['id', 'tags']));
+            $post->save();
 
-		// Validate the data
-		$errors = $this->validator->validate($data, $rules, $messages);
-		if($errors) {
-			throw new HttpUnprocessableException($request, $errors);
-		}
-	}
+            $tags = $data['tags'];
+            $tagIds = [];
+            foreach ($tags as $tag) {
+                $tag = Tag::firstOrCreate(['name' => $tag]);
+                $tagIds[] = $tag->id;
+            }
 
+            $post->tags()->sync($tagIds);
+            $post->save();
+
+            $connection->commit(); // Commit the transaction
+        } catch (\Exception $e) {
+            $connection->rollBack(); // Rollback the transaction on error
+            $this->logger->error("Fail create post: " . $e->getMessage());
+            throw new HttpInternalServerErrorException($request);
+        }
+
+        return $this->respondWithData($response, (new PostResponse())->map($post));
+    }
+
+    public function delete(Request $request, Response $response, array $args): Response
+    {
+        $uuid = $args['id'];
+
+        /** @var User $user get auth user */
+        $user = $request->getAttribute('user');
+
+        $post = $user->posts()->where('uuid', $uuid)->first();
+        if (!$post) {
+            throw new HttpNotFoundException($request, 'Post not found');
+        }
+
+        $post->delete();
+
+        return $this->respondWithData(null, 204);
+    }
+
+    private function validateFormData(Request $request, array $data): void
+    {
+        // Define the validation rules
+        $rules = [
+            "id"     => ['nullable', 'string'], // if null generate uuid
+            "title"  => ['required', 'string'],
+            "body"   => ['required', 'string'],
+            "status" => ['required', 'string', Rule::in([Post::STATUS_ONLINE, Post::STATUS_OFFLINE])],
+            "tags"   => ['required', "array", "min:0", "max:5"],
+            'tags.*' => ['required', 'string', 'distinct'], // Each item must be a unique string
+
+        ];
+
+        $messages = [
+            'title.required'  => 'Title is required.',
+            'body.required'   => 'Content is required.',
+            'status.required' => 'Status is required.',
+            'status.in'       => 'Status is not valid.',
+            'tags.required'   => 'Tags is required.',
+            'tags.*.distinct' => 'Tags item in the list must be unique.',
+
+        ];
+
+        // Validate the data
+        $errors = $this->validator->validate($data, $rules, $messages);
+        if($errors) {
+            throw new HttpUnprocessableException($request, $errors);
+        }
+    }
 }

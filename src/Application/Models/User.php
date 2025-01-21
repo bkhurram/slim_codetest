@@ -7,48 +7,46 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Model
 {
-	protected $fillable = [
-		'givenName',
-		'familyName',
-		'email',
-		'password',
-		'dateOfBirth',
-	];
+    protected $fillable = [
+        'givenName',
+        'familyName',
+        'email',
+        'password',
+        'dateOfBirth',
+    ];
 
-	protected $hidden = [
-		'id',
-		'password',
-	];
+    protected $hidden = [
+        'id',
+        'password',
+    ];
 
-	protected $appends = [
-		'name',
-	];
+    protected $appends = [
+        'name',
+    ];
 
+    // Disable timestamps if not needed
+    public $timestamps = false;
 
-	// Disable timestamps if not needed
-	public $timestamps = false;
+    public static function boot()
+    {
+        parent::boot();
 
-	public static function boot()
-	{
-		parent::boot();
+        static::creating(function ($model) {
+            $model->createdAt = $model->freshTimestamp();
+        });
+    }
 
-		static::creating(function ($model) {
-			$model->createdAt = $model->freshTimestamp();
-		});
-	}
+    public function address(): HasOne
+    {
+        return $this->hasOne(UserAddress::class);
+    }
 
-	public function address(): HasOne
-	{
-		return $this->hasOne(UserAddress::class);
-	}
+    public function posts() {
+        return $this->hasMany(Post::class);
+    }
 
-	public function posts() {
-		return $this->hasMany(Post::class);
-	}
-
-	public function getNameAttribute()
-	{
-		return trim("$this->givenName $this->familyName");
-	}
-
+    public function getNameAttribute()
+    {
+        return trim("$this->givenName $this->familyName");
+    }
 }

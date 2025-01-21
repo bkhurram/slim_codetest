@@ -14,8 +14,10 @@ use Slim\Exception\HttpNotFoundException;
 abstract class Action
 {
     protected LoggerInterface $logger;
-	protected ValidatorService $validator;
-	protected Capsule $capsule;
+
+    protected ValidatorService $validator;
+
+    protected Capsule $capsule;
 
     protected Request $request;
 
@@ -26,8 +28,8 @@ abstract class Action
     public function __construct(LoggerInterface $logger, ValidatorService $validator, Capsule $capsule)
     {
         $this->logger = $logger;
-		$this->validator = $validator;
-		$this->capsule = $capsule;
+        $this->validator = $validator;
+        $this->capsule = $capsule;
     }
 
     /**
@@ -79,6 +81,7 @@ abstract class Action
     protected function respondWithData($data = null, int $statusCode = 200): Response
     {
         $payload = new ActionPayload($statusCode, $data);
+
         return $this->respond($payload);
     }
 

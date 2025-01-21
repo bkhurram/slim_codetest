@@ -9,28 +9,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Post extends Model
 {
-	use HasUuid;
-	use HasUser;
+    use HasUuid;
+    use HasUser;
 
-	const STATUS_ONLINE = 'online';
-	const STATUS_OFFLINE = 'offline';
+    const STATUS_ONLINE = 'online';
 
-	protected $fillable = [
-		'user_id',
-		'uuid',
-		'title',
-		'body',
-		'status',
-	];
+    const STATUS_OFFLINE = 'offline';
 
-	protected $hidden = [
-		'id',
-	];
+    protected $fillable = [
+        'user_id',
+        'uuid',
+        'title',
+        'body',
+        'status',
+    ];
 
-	public $timestamps = false;
+    protected $hidden = [
+        'id',
+    ];
 
-	public function tags(): BelongsToMany
-	{
-		return $this->belongsToMany(Tag::class);
-	}
+    public $timestamps = false;
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 }

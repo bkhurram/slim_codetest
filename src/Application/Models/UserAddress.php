@@ -7,24 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserAddress extends Model
 {
-	use HasUser;
+    use HasUser;
 
-	protected $fillable = [
-		'user_id',
-		'street',
-		'city',
-		'post_code',
-		'country_code',
-		'lat',
-		'lng'
-	];
+    protected $fillable = [
+        'user_id',
+        'street',
+        'city',
+        'post_code',
+        'country_code',
+        'lat',
+        'lng',
+    ];
 
-	protected $hidden = ['id'];
+    protected $hidden = ['id'];
 
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'lat' => 'float',
-		'lng' => 'float'
-	];
+    protected $casts = [
+        'lat' => 'float',
+        'lng' => 'float',
+    ];
 }
