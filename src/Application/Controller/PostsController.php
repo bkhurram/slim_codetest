@@ -198,7 +198,7 @@ class PostsController extends BaseController
 
         ];
 
-		// Validate the data
+        // Validate the data
         $errors = $this->validator->validate($data, $rules, $messages);
         if($errors) {
             throw new HttpUnprocessableException($request, $errors);
