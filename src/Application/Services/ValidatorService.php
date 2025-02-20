@@ -2,12 +2,12 @@
 
 namespace App\Application\Services;
 
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Factory;
-use Illuminate\Validation\Validator;
 
 class ValidatorService
 {
-    protected $validator;
+    protected Factory $validator;
 
     public function __construct()
     {
@@ -15,7 +15,7 @@ class ValidatorService
         $this->validator = new Factory(new DummyTranslator());
     }
 
-    public function validate(array $data, array $rules, array $messages = [])
+    public function validate(array $data, array $rules, array $messages = []): ?MessageBag
     {
         // Perform validation
         $validation = $this->validator->make($data, $rules, $messages);

@@ -51,7 +51,8 @@ class AuthMiddleware implements Middleware
             $response = new \Slim\Psr7\Response();
             $response->getBody()->write(json_encode(['error' => 'Token invalid or expired']));
 
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+            return $response->withHeader('Content-Type', 'application/json')
+                            ->withStatus(401);
         }
 
         return $handler->handle($request);

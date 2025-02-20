@@ -12,8 +12,8 @@ use App\Application\Response\PostResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 
@@ -172,7 +172,7 @@ class PostsController extends BaseController
 
         $post->delete();
 
-        return $this->respondWithData(null, 204);
+        return $this->respondWithData($response, null, 204);
     }
 
     private function validateFormData(Request $request, array $data): void
