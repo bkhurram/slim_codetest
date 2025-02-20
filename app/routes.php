@@ -1,5 +1,7 @@
 <?php
 
+use App\Application\Actions\Event\EventAction;
+use App\Application\Actions\Static\StaticServeAction;
 use App\Application\Actions\User\LoginAction;
 use App\Application\Actions\User\UserByEmailAction;
 use App\Application\Actions\User\UserCreateAction;
@@ -29,4 +31,7 @@ return function (App $app) {
         $group->put('/{id}', [PostsController::class, 'update']);
         $group->delete('/{id}', [PostsController::class, 'delete']);
     })->add(AuthMiddleware::class);
+
+    $app->get('/events', EventAction::class);
+    $app->get('/static/{file}', StaticServeAction::class);
 };

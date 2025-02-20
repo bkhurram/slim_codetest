@@ -10,6 +10,8 @@ use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+define('APP_ROOT', dirname(realpath(__DIR__)));
+
 // LOAD ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
