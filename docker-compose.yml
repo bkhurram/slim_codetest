@@ -32,7 +32,7 @@ services:
       - qwentes-codetest
   phpmyadmin:
     image: phpmyadmin
-    restart: always
+    restart: on-failure
     environment:
       PMA_HOST: mysql
       PMA_USER: ${DB_USERNAME}
